@@ -1,0 +1,5 @@
+*.settings
+Gemfile.lock
+install_mingw.exe
+install_ruby.exe
+.installed_*

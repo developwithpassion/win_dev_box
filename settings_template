@@ -1,0 +1,15 @@
+configure({
+  paths: {
+    windows:{
+      utils: "C:\\utils\\",
+      ruby: "C:\\utils\\ruby\\215\\",
+    },
+    unix:{
+      utils: '/c/utils/',
+      ruby: '/c/utils/ruby/215/',
+      mingw: delayed { 
+        File.join(settings.paths.unix.utils, 'mingw')
+      }
+    }
+  }
+})

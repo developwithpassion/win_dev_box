@@ -1,0 +1,106 @@
+#!/usr/bin/env bash
+ruby_installer=http://dl.bintray.com/oneclick/rubyinstaller/rubyinstaller-2.1.5.exe?direct
+
+mingw_installer=https://s3.amazonaws.com/developwithpassion-files/training/mingw-get-setup.exe
+
+mingw_get=$UTILS/mingw/bin/mingw-get.exe
+export PATH=$UTILS/mingw/bin:$PATH
+
+function install_ruby(){
+  if ! ruby --version
+  then
+    if [ ! -e install_ruby.exe ]
+    then
+      curl -o install_ruby.exe $ruby_installer
+    fi
+    install_ruby.exe
+  fi
+}
+
+function update_rubygems(){
+  if [ ! -e .gem_updated_installed ]
+  then
+    if [ ! -e cert.pem ]
+    then
+      curl http://curl.haxx.se/ca/cacert.pem -o cert.pem
+      SSL_CERT_FILE="cert.pem" gem update --system
+      touch .gem_updated_installed
+    fi
+  fi
+}
+
+function install_base_ruby_packages(){
+  if [ ! -e .installed_base_ruby_packages ]
+  then
+    gem uninstall bundler -x --force
+    gem install bundler
+    bundle install
+    touch .installed_base_ruby_packages
+  fi
+}
+
+function install_chocolatey(){
+ if ! choco
+ then
+   powershell -NoProfile -ExecutionPolicy unrestricted -Command "iex ((new-object net.webclient).DownloadString('https://chocolatey.org/install.ps1'))" && export PATH=$PATH:$ALLUSERSPROFILE/chocolatey/bin
+ fi
+}
+
+function install_mingw(){
+  if ! mingw-get --version
+  then
+    if [ ! -e install_mingw.exe ]
+    then
+      curl -o install_mingw.exe $mingw_installer
+    fi
+    install_mingw.exe
+  fi
+}
+
+function install_mingw_package(){
+ $mingw_get install $1
+}
+
+function install_mingw_packages(){
+  if [ -e .installed_mingw_packages ]
+  then
+    return
+  fi
+  install_mingw_package mingw-developer-toolkit
+  install_mingw_package mingw32-base
+  install_mingw_package mingw32-gcc-g++
+  touch .installed_mingw_packages
+}
+
+function install_chocolatey_packages(){
+  if [ -e .installed_chocolatey_packages ]
+  then
+    return
+  fi
+  choco install virtualbox
+  choco install vagrant
+  touch .installed_chocolatey_packages
+}
+
+function install_iis_express(){
+  if [ ! -e $UTILS/iis_express ]
+  then
+    if [ ! -e $UTILS/iis_express.zip ]
+    then
+      cd $UTILS
+      curl -o iis_express.zip https://s3.amazonaws.com/developwithpassion-files/training/iis_express.zip
+    fi
+    unzip iis_express.zip
+  fi
+}
+
+install_ruby
+update_rubygems
+install_base_ruby_packages
+install_mingw
+install_mingw_packages
+install_chocolatey
+install_chocolatey_packages
+install_iis_express
+
+bundle exec ruby wrap_up.rb
