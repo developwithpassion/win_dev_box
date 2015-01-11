@@ -79,6 +79,7 @@ function install_chocolatey_packages(){
   fi
   choco install virtualbox
   choco install vagrant
+  choco install nodejs.commandline
   touch .installed_chocolatey_packages
 }
 
